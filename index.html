@@ -36,6 +36,17 @@
       margin: 0 auto 16px;
       text-align: center;
       overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .ad-slot-above-btn {
+      margin: 0 auto 20px;
+      max-width: 100%;
+    }
+    .ad-slot-below-btn {
+      margin: 20px auto 16px;
+      max-width: 100%;
     }
     .ad-slot-bottom { margin-top: 16px; margin-bottom: 0; }
 
@@ -247,9 +258,19 @@
     <h1>Is This Link Safe?</h1>
     <p class="tagline">This is a free link-safety checker for anyone who gets a suspicious URL in a text, email, or DM and wants a plain answer before they click it.</p>
 
+    <!-- Ad Slot Above Button -->
+    <div class="ad-slot ad-slot-above-btn" id="ad-above-button">
+      <script>(function(s){s.dataset.zone='11829213',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    </div>
+
     <div class="input-group">
       <input type="text" id="url-input" placeholder="Paste a link here…" autocomplete="off" spellcheck="false" autofocus aria-label="Enter a URL to check">
       <button id="check-btn" onclick="checkUrl()">Check</button>
+    </div>
+
+    <!-- Ad Slot Below Button -->
+    <div class="ad-slot ad-slot-below-btn" id="ad-below-button">
+      <!-- AD SLOT: Paste banner code here (Monetag / Adsterra) -->
     </div>
 
     <div id="result"></div>
