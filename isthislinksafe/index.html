@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Is This Link Safe? — Free URL Safety Checker</title>
+  <meta name="description" content="Paste any link and instantly find out if it is safe to click. Free URL safety checker for anyone worried about phishing, malware, and scam links.">
+  <meta property="og:title" content="Is This Link Safe? — Free URL Safety Checker">
+  <meta property="og:description" content="Paste any link and instantly find out if it is safe to click. No login, no signup, just a straight answer.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://isthislinksafe.netlify.app/">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px;
+      line-height: 1.6;
+    }
+
+    /* --- Ad Slots --- */
+    .ad-slot {
+      width: 100%;
+      max-width: 728px;
+      min-height: 10px;
+      margin: 0 auto 16px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .ad-slot-bottom { margin-top: 16px; margin-bottom: 0; }
+
+    /* --- Main Card --- */
+    main {
+      width: 100%;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+      padding: 40px 32px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .tagline {
+      text-align: center;
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 32px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* --- Input Group --- */
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="url"], input[type="text"] {
+      flex: 1;
+      padding: 16px 18px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    button {
+      padding: 16px 28px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover { background: #1d4ed8; }
+    button:active { transform: scale(0.98); }
+    button:disabled { background: #93c5fd; cursor: wait; }
+
+    /* --- Results --- */
+    #result {
+      margin-top: 28px;
+      display: none;
+    }
+    #result.visible { display: block; }
+
+    .verdict {
+      padding: 20px 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .verdict-safe { background: #ecfdf5; border: 1px solid #a7f3d0; }
+    .verdict-suspicious { background: #fffbeb; border: 1px solid #fde68a; }
+    .verdict-dangerous { background: #fef2f2; border: 1px solid #fecaca; }
+
+    .verdict h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .verdict-safe h2 { color: #059669; }
+    .verdict-suspicious h2 { color: #b45309; }
+    .verdict-dangerous h2 { color: #dc2626; }
+    .verdict p { color: #4b5563; font-size: 15px; }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .checks {
+      list-style: none;
+    }
+    .checks li {
+      padding: 14px 0;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 15px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .checks li:last-child { border-bottom: none; }
+
+    .check-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+    .check-safe .check-icon { background: #d1fae5; color: #059669; }
+    .check-warn .check-icon { background: #fef3c7; color: #b45309; }
+    .check-danger .check-icon { background: #fee2e2; color: #dc2626; }
+    .check-unknown .check-icon { background: #f3f4f6; color: #9ca3af; }
+
+    .check-name { font-weight: 600; color: #1f2937; }
+    .check-detail { color: #6b7280; font-size: 14px; margin-top: 2px; }
+
+    .checked-url {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: #f9fafb;
+      border-radius: 10px;
+      word-break: break-all;
+      font-size: 13px;
+      color: #6b7280;
+      font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+    }
+    .checked-at {
+      text-align: right;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+
+    .error-box {
+      padding: 16px 20px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      color: #991b1b;
+      font-size: 15px;
+    }
+
+    /* --- Footer --- */
+    footer {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 13px;
+      color: #9ca3af;
+      max-width: 500px;
+      line-height: 1.7;
+    }
+    footer a { color: #6b7280; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* --- Loading spinner --- */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* --- Mobile --- */
+    @media (max-width: 500px) {
+      main { padding: 28px 20px; border-radius: 12px; }
+      h1 { font-size: 26px; }
+      .tagline { font-size: 15px; margin-bottom: 24px; }
+      .input-group { flex-direction: column; }
+      button { width: 100%; padding: 16px; }
+      input[type="url"], input[type="text"] { font-size: 16px; }
+      .verdict { padding: 16px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Ad Slot -->
+  <div class="ad-slot" id="ad-top">
+    <!-- PASTE YOUR AD CODE HERE (e.g. Monetag or Adsterra banner) -->
+  </div>
+
+  <main>
+    <h1>Is This Link Safe?</h1>
+    <p class="tagline">This is a free link-safety checker for anyone who gets a suspicious URL in a text, email, or DM and wants a plain answer before they click it.</p>
+
+    <div class="input-group">
+      <input type="text" id="url-input" placeholder="Paste a link here…" autocomplete="off" spellcheck="false" autofocus aria-label="Enter a URL to check">
+      <button id="check-btn" onclick="checkUrl()">Check</button>
+    </div>
+
+    <div id="result"></div>
+  </main>
+
+  <!-- Bottom Ad Slot -->
+  <div class="ad-slot ad-slot-bottom" id="ad-bottom">
+    <!-- PASTE YOUR AD CODE HERE (e.g. Monetag or Adsterra banner) -->
+  </div>
+
+  <footer>
+    <p>Links are checked against the <a href="https://urlhaus.abuse.ch/" target="_blank" rel="noopener">URLhaus</a> malware database and analyzed for common phishing patterns. No data is stored. No login required.</p>
+  </footer>
+
+  <script>
+    var input = document.getElementById('url-input');
+    var btn = document.getElementById('check-btn');
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') checkUrl();
+    });
+
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function normalizeUrl(raw) {
+      raw = raw.trim();
+      if (!raw) return '';
+      if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw)) {
+        raw = 'https://' + raw;
+      }
+      return raw;
+    }
+
+    async function checkUrl() {
+      var raw = input.value.trim();
+      if (!raw) {
+        input.focus();
+        return;
+      }
+
+      var url = normalizeUrl(raw);
+
+      // Basic client-side URL validation
+      try {
+        new URL(url);
+      } catch {
+        showError('That does not look like a valid link. Please paste a full URL like https://example.com');
+        return;
+      }
+
+      // Show loading
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Checking…';
+      document.getElementById('result').classList.remove('visible');
+
+      try {
+        var response = await fetch('/.netlify/functions/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url })
+        });
+
+        if (!response.ok) {
+          var errData = await response.json().catch(function() { return {}; });
+          throw new Error(errData.error || 'Server error (' + response.status + ')');
+        }
+
+        var data = await response.json();
+        renderResults(data);
+      } catch (err) {
+        showError('Something went wrong: ' + escapeHtml(err.message) + '. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Check';
+      }
+    }
+
+    function showError(message) {
+      var resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '<div class="error-box">' + message + '</div>';
+      resultDiv.classList.add('visible');
+    }
+
+    function renderResults(data) {
+      var resultDiv = document.getElementById('result');
+
+      // Verdict block
+      var level = data.threatLevel;
+      var emoji, title, desc;
+
+      if (level === 'safe') {
+        emoji = '✅';
+        title = 'This link looks safe';
+        desc = 'We checked this URL against malware databases and analyzed it for phishing patterns. No threats were found.';
+      } else if (level === 'suspicious') {
+        emoji = '⚠️';
+        title = 'This link looks suspicious';
+        desc = 'We found characteristics commonly associated with unsafe links. Proceed with caution or avoid clicking.';
+      } else {
+        emoji = '🚫';
+        title = 'This link may be dangerous';
+        desc = 'We found indicators that this link could be harmful. We recommend you do not click it.';
+      }
+
+      var html = '';
+      html += '<div class="verdict verdict-' + level + '">';
+      html += '<h2>' + emoji + ' ' + title + '</h2>';
+      html += '<p>' + desc + '</p>';
+      html += '</div>';
+
+      html += '<p class="section-title">What we checked:</p>';
+      html += '<ul class="checks">';
+
+      for (var i = 0; i < data.findings.length; i++) {
+        var f = data.findings[i];
+        var sevClass, icon;
+        if (f.severity === 'safe') { sevClass = 'check-safe'; icon = '✓'; }
+        else if (f.severity === 'suspicious') { sevClass = 'check-warn'; icon = '!'; }
+        else if (f.severity === 'dangerous') { sevClass = 'check-danger'; icon = '✗'; }
+        else { sevClass = 'check-unknown'; icon = '?'; }
+
+        html += '<li class="' + sevClass + '">';
+        html += '<span class="check-icon">' + icon + '</span>';
+        html += '<div>';
+        html += '<div class="check-name">' + escapeHtml(f.check) + '</div>';
+        html += '<div class="check-detail">' + escapeHtml(f.result) + '</div>';
+        html += '</div>';
+        html += '</li>';
+      }
+
+      html += '</ul>';
+      html += '<div class="checked-url">Checked: ' + escapeHtml(data.url) + '</div>';
+      html += '<div class="checked-at">Checked at ' + new Date(data.checkedAt).toLocaleString() + '</div>';
+
+      resultDiv.innerHTML = html;
+      resultDiv.classList.add('visible');
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  </script>
+</body>
+</html>
